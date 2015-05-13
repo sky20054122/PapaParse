@@ -75,11 +75,23 @@ function errorFn(error, file)
 function completeFn(results, file)
 {
     console.log("Parsing complete:", results, file);
-    var html = "";
-    $(results.data).each(function(index,device){
-        html+="<tr><td>"+device[0]+"</td><td>"+device[1]+"</td><td>"+device[2]+"</td><td>"+device[3]+"</td></tr>";
-    });
-    $("#result").html(html);
+//    var html = "";
+//    $(results.data).each(function(index,device){
+//        html+="<tr><td>"+device.number+"</td><td>"+device.UUID+"</td><td>"+device.genaration+"</td><td>"+device.subversion+"</td></tr>";
+//    });
+//    $("#result").html(html);
+}
+
+//To stream the input, define a callback function:
+ function step(results, parser) {
+    console.log("Row data:", results.data);
+     var device = results.data[0];
+     $("#result").append("<tr><td>"+device.number+"</td><td>"+device.UUID+"</td><td>"+device.genaration+"</td><td>"+device.subversion+"</td></tr>");
+    console.log("Row errors:", results.errors);
+     parser.pause();
+     setTimeout(function(){
+         parser.resume();
+     },2000)
 }
 
 
@@ -88,13 +100,13 @@ function buildConfig()
     return {
         delimiter: "",	// auto-detect
         newline: "",	// auto-detect
-        header: false,  //true第一行解析为文件名称
+        header: true,  //true第一行解析为表头
         dynamicTyping: false, //数值是否转型
         preview: 0,  //如果>0只解析多少航限制
-        encoding: "UTF-8", //文件编码格式
+        encoding: "GBK", //文件编码格式
         worker: false, //Whether or not to use a worker thread. Using a worker will keep your page reactive, but may be slightly slower.
         comments: false, //跳过注释行  #  //
-        step: undefined, //可以设置函数，步进解析文件
+        step: step, //可以设置函数，步进解析文件
         complete: completeFn, //完成触发函数
         error: errorFn,//发生错误触发函数
         download: false, //是否生成下载url
